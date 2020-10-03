@@ -48,15 +48,12 @@ tiredchange = mean(DeltaQuestio,2);
 [hgrp,pgrp, ~, statsgrp] = ttest(tiredchange(1:2:48), tiredchange(2:2:48))
 [psleepy, hsleepy, statsleepy] = ranksum(Karolinska(1:2:48), Karolinska(2:2:48))
 
-% not sure if it's best to mean (or median?) across items or across subjects??
-% it's always significant anyways..
-
 [pkaro,hkaro, statskaro] = signrank(Karolinska) % Karolinska
 effsizekaro = statskaro.zval/sqrt(length(Karolinska))
 
 [hmfi,pmfi, ~, statsmfi] = ttest(mean(DeltaQuestio')) % MFI items
 cohen = mean(DeltaQuestio')/std(DeltaQuestio');
-% let's try to correlate it with behaviour (and eeg?)
+% let's try to correlate it with behaviour
 % cd('C:\Users\MococoEEG\ownCloud\MATLAB\Scripts\TDT\private\analysis\data_extracted\Tables\Behavior')
 % Behaviour = readtable('RAWTABLE.txt');
 Behaviour = readtable('~/ownCloud/MATLAB/Scripts/TDT/private/analysis/data_extracted/Tables/Behavior/RAWTABLE.txt');
