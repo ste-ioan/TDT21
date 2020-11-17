@@ -7,7 +7,7 @@
 results = readtable('~/Downloads/results - questionnaires.csv');
 
 % i will put the tests in a coherent way. all answers are 1 yes 5 no
-% positive change = more tired
+% take abs so that positive change = more tired
 
 % item 1 'i feel very active' 
 DeltaQuestio(:,1) = abs(results.MFI1_Pre - results.MFI1_Post); 
@@ -34,29 +34,31 @@ DeltaQuestio(:,11) = results.MFI11_Pre - results.MFI11_Post;
 % item 12 'i fatigue easily'
 DeltaQuestio(:,12) = results.MFI12_Pre - results.MFI12_Post;
 % item 13 'i don't feel like doing anything'
-DeltaQuestio(:,13) = abs(results.MFI13_Pre - results.MFI13_Post);
+DeltaQuestio(:,13) = results.MFI13_Pre - results.MFI13_Post; 
 % item 14 'my thoughts cross easily'
-DeltaQuestio(:,14) = abs(results.MFI13_Pre - results.MFI13_Post);
+DeltaQuestio(:,14) = results.MFI14_Pre - results.MFI14_Post;
 % item 15 'i feel perfect physically'
-DeltaQuestio(:,15) = results.MFI13_Pre - results.MFI13_Post;
+DeltaQuestio(:,15) = abs(results.MFI15_Pre - results.MFI15_Post);
 
 % karolinska scale, higher number = more sleepiness
 Karolinska = results.KarolinskaPost - results.KarolinskaPre;
 
-
+% check if groups differ in evaluation
 tiredchange = mean(DeltaQuestio,2);
 [hgrp,pgrp, ~, statsgrp] = ttest(tiredchange(1:2:48), tiredchange(2:2:48))
 [psleepy, hsleepy, statsleepy] = ranksum(Karolinska(1:2:48), Karolinska(2:2:48))
 
+% whole sample change in sleepiness and tiredness 
 [pkaro,hkaro, statskaro] = signrank(Karolinska) % Karolinska
 effsizekaro = statskaro.zval/sqrt(length(Karolinska))
 
 [hmfi,pmfi, ~, statsmfi] = ttest(mean(DeltaQuestio')) % MFI items
 cohen = mean(DeltaQuestio')/std(DeltaQuestio');
+
 % let's try to correlate it with behaviour
 % cd('C:\Users\MococoEEG\ownCloud\MATLAB\Scripts\TDT\private\analysis\data_extracted\Tables\Behavior')
 % Behaviour = readtable('RAWTABLE.txt');
-Behaviour = readtable('~/ownCloud/MATLAB/Scripts/TDT/private/analysis/data_extracted/Tables/Behavior/RAWTABLE.txt');
+Behaviour = readtable('~/ownCloud/MATLAB/Scripts/TDT/original/private/analysis/data_extracted/Tables/Behavior/RAWTABLE.txt');
 
 DeltaSaturationBeg = Behaviour.SATbeg- Behaviour.NONSATbeg;
 DeltaSaturationFin = Behaviour.SATfin - Behaviour.NONSATfin;
@@ -66,11 +68,12 @@ DeltaSaturationFin = Behaviour.SATfin - Behaviour.NONSATfin;
 DeltaofDelta = DeltaSaturationFin - DeltaSaturationBeg;
 % order of deltaing does not change outcome
 color = rgb('dark green')
-plot(mean(DeltaQuestio'),DeltaofDelta,'Color', color, 'Marker', '.', 'MarkerSize', 30, 'LineStyle', 'none')
+plot(DeltaofDelta,mean(DeltaQuestio'),'Color', color, 'Marker', '.', 'MarkerSize', 30, 'LineStyle', 'none')
 [rhomfi, corrpvalmfi] = corr(mean(DeltaQuestio')',DeltaofDelta)
 
 data = table(mean(DeltaQuestio')',DeltaofDelta);
 data.Properties.VariableNames = {'MFI', 'Behaviour'};
+writetable(data, '~/ownCloud/MATLAB/Scripts/TDT/original/private/analysis/data_extracted/Tables/Behavior/QuestioCorrel.txt')
 
-writetable(data, '~/ownCloud/MATLAB/Scripts/TDT/private/analysis/data_extracted/Tables/Behavior/QuestioCorrel.txt')
-
+% do corr on sleepiness scores
+[rhoKaro, corrpvalKaro] = corr(Karolinska,DeltaofDelta, 'type', 'Spearman')
