@@ -11,10 +11,11 @@ carsounds = {carsounds(:).name};
 
 sounds = {animalsounds;carsounds};
 
-cd('~/Desktop/tdt_data_backup/')
+datafolder = '~/Documents/tdt_sources/tdt_data_backup/';
+cd(datafolder)
 
 data_carpets = dir();
-data_carpets = data_carpets(4:end-1);
+data_carpets = data_carpets(4:end);
 
 for subject = 1:length(data_carpets)
     cd([cd,filesep,data_carpets(subject).name])
@@ -58,7 +59,7 @@ for subject = 1:length(data_carpets)
                     SID_ratio(subject, tasknum) = (sum(correct) / (sum(correct) + sum(wrong))) * 100;
                     
                 else
-                    
+%                     
                     correctCounter = 0;
                     wrongCounter = 0;
                     
@@ -116,7 +117,7 @@ for subject = 1:length(data_carpets)
                     end
                     
                     SID_ratio(subject, tasknum) = (correctCounter / (correctCounter + wrongCounter)) * 100;
-                end
+                 end
                 
         end
         clear wrong correct correctCounter wrongCounter
@@ -127,7 +128,7 @@ end
 
 clearvars -except NBA_ratio SID_ratio SIM_ratio
 
-% performance in audio tasks, per group
+% overall performance in audio tasks, per group
 mean(nonzeros(NBA_ratio(1:2:48, :)))
 mean(nonzeros(NBA_ratio(2:2:48, :)))
 
@@ -136,3 +137,43 @@ mean(nonzeros(SID_ratio(2:2:48, :)))
 
 mean(nonzeros(SIM_ratio(1:2:48, :)))
 mean(nonzeros(SIM_ratio(2:2:48, :)))
+
+
+% to do group wise comparisons
+ez_nba = NBA_ratio(1:2:48, :);
+ez_nba(ez_nba == 0) = nan;
+ez_nba = nanmean(ez_nba, 2);
+
+hrd_nba = NBA_ratio(2:2:48, :);
+hrd_nba(hrd_nba == 0) = nan;
+hrd_nba = nanmean(hrd_nba, 2);
+
+[~, p_nback,~, stats_nback] = ttest2(ez_nba, hrd_nba);
+effsize_nback = computeCohen_d(ez_nba, hrd_nba);
+
+
+% simon
+ez_simon = SIM_ratio(1:2:48, :);
+ez_simon(ez_simon == 0) = nan;
+ez_simon = nanmean(ez_simon, 2);
+
+hrd_simon = SIM_ratio(2:2:48, :);
+hrd_simon(hrd_simon == 0) = nan;
+hrd_simon = nanmean(hrd_simon, 2);
+
+[~, p_simon,~, stats_simon] = ttest2(ez_simon, hrd_simon);
+effsize_simon = computeCohen_d(ez_simon, hrd_simon);
+
+% side
+ez_side = SID_ratio(1:2:48, :);
+ez_side(ez_side == 0) = nan;
+ez_side = nanmean(ez_side, 2);
+
+hrd_side = SID_ratio(2:2:48, :);
+hrd_side(hrd_side == 0) = nan;
+hrd_side = nanmean(hrd_side, 2);
+
+[~, p_side, ~, stats_side] = ttest2(ez_side, hrd_side);
+effsize_side = computeCohen_d(ez_side, hrd_side);
+
+
