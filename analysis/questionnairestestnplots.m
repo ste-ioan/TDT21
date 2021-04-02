@@ -9,7 +9,7 @@ results = readtable('~/Downloads/results - questionnaires.csv');
 % i will put the tests in a coherent way. all answers are 1 yes 5 no
 % take abs so that positive change = more tired
 
-% item 1 'i feel very active' 
+% item 1 'i feel very in shape' 
 DeltaQuestio(:,1) = abs(results.MFI1_Pre - results.MFI1_Post); 
 % item 2 'physically i don't feel like doing much' 
 DeltaQuestio(:,2) = results.MFI2_Pre - results.MFI2_Post;
@@ -41,39 +41,91 @@ DeltaQuestio(:,14) = results.MFI14_Pre - results.MFI14_Post;
 DeltaQuestio(:,15) = abs(results.MFI15_Pre - results.MFI15_Post);
 
 % karolinska scale, higher number = more sleepiness
-Karolinska = results.KarolinskaPost - results.KarolinskaPre;
+Karopre = results.KarolinskaPre;
+Karopost= results.KarolinskaPost;
 
-% check if groups differ in evaluation
-tiredchange = mean(DeltaQuestio,2);
-[hgrp,pgrp, ~, statsgrp] = ttest(tiredchange(1:2:48), tiredchange(2:2:48))
-[psleepy, hsleepy, statsleepy] = ranksum(Karolinska(1:2:48), Karolinska(2:2:48))
+T_karo = array2table([Karopre, Karopost]);
+T_karo(:,end+1) = cell2table(repmat({'easy','hard'}', 24,1));
+T_karo.Properties.VariableNames = {'Pre', 'Post', 'group'};
 
-% whole sample change in sleepiness and tiredness 
-[pkaro,hkaro, statskaro] = signrank(Karolinska) % Karolinska
-effsizekaro = statskaro.zval/sqrt(length(Karolinska))
+cd('~/Documents/jamovi analyses/TDT/Questionnaires/')
+writetable(T_karo)
 
-[hmfi,pmfi, ~, statsmfi] = ttest(mean(DeltaQuestio')) % MFI items
-cohen = mean(DeltaQuestio')/std(DeltaQuestio');
+% harmonize MFI items
+negative_items = [2, 4, 7, 10, 11, 12, 13, 14];
+
+for k = 1:numel(negative_items)    
+   tmp_pre(:,k) = eval(['results.MFI',num2str(negative_items(k)),'_Pre']);
+    tmp_post(:,k) = eval(['results.MFI',num2str(negative_items(k)),'_Pre']);
+end
+
+for jj = 1:length(tmp_pre)
+
+for ll = 1:(negative_items)
+    switch tmp_pre(jj, ll)       
+        case 5
+          tmp_pre(jj, ll) = 1;
+        case 4
+          tmp_pre(jj, ll) = 2;
+        case 2
+          tmp_pre(jj, ll) = 4;
+        case 1
+          tmp_pre(jj, ll) = 5;
+    end
+end
+end
+
+for jj = 1:length(tmp_post)
+
+for ll = 1:(negative_items)
+    switch tmp_post(jj, ll)       
+        case 5
+          tmp_post(jj, ll) = 1;
+        case 4
+          tmp_post(jj, ll) = 2;
+        case 2
+          tmp_post(jj, ll) = 4;
+        case 1
+          tmp_post(jj, ll) = 5;
+    end
+end
+end
+
+MFI_pre = [results.MFI1_Pre,results.MFI3_Pre,results.MFI5_Pre,results.MFI6_Pre,...
+    results.MFI8_Pre,results.MFI9_Pre,results.MFI15_Pre, tmp_pre];
+
+MFI_post = [results.MFI1_Post,results.MFI3_Post,results.MFI5_Post,results.MFI6_Post,...
+    results.MFI8_Post,results.MFI9_Post,results.MFI15_Post, tmp_post];
+
+T_MFI = array2table([mean(MFI_pre,2), mean(MFI_post,2)]);
+T_MFI (:,end+1) = cell2table(repmat({'easy','hard'}', 24,1));
+
+T_MFI.Properties.VariableNames = {'Pre', 'Post', 'group'};
+
+cd('~/Documents/jamovi analyses/TDT/Questionnaires/')
+writetable(T_MFI)
 
 % let's try to correlate it with behaviour
-% cd('C:\Users\MococoEEG\ownCloud\MATLAB\Scripts\TDT\private\analysis\data_extracted\Tables\Behavior')
-% Behaviour = readtable('RAWTABLE.txt');
 Behaviour = readtable('~/ownCloud/MATLAB/Scripts/TDT/original/private/analysis/data_extracted/Tables/Behavior/RAWTABLE.txt');
 
 DeltaSaturationBeg = Behaviour.SATbeg- Behaviour.NONSATbeg;
 DeltaSaturationFin = Behaviour.SATfin - Behaviour.NONSATfin;
-% in delta of delta is positive, large values indicate a substantial 
-% difference in scores across
-% saturation condition AND session
-DeltaofDelta = DeltaSaturationFin - DeltaSaturationBeg;
-% order of deltaing does not change outcome
-color = rgb('dark green')
-plot(DeltaofDelta,mean(DeltaQuestio'),'Color', color, 'Marker', '.', 'MarkerSize', 30, 'LineStyle', 'none')
-[rhomfi, corrpvalmfi] = corr(mean(DeltaQuestio')',DeltaofDelta)
+DeltaofDeltaBehav = DeltaSaturationFin - DeltaSaturationBeg;
 
-data = table(mean(DeltaQuestio')',DeltaofDelta);
-data.Properties.VariableNames = {'MFI', 'Behaviour'};
-writetable(data, '~/ownCloud/MATLAB/Scripts/TDT/original/private/analysis/data_extracted/Tables/Behavior/QuestioCorrel.txt')
+
+deltaMFI = mean(DeltaQuestio,2);
+color = rgb('dark green');
+plot(DeltaofDeltaBehav,deltaMFI,'Color', color, 'Marker', '.', 'MarkerSize', 30, 'LineStyle', 'none')
+[rhomfi, corrpvalmfi] = corr(deltaMFI,DeltaofDeltaBehav);
+
+mycorr = @(deltaMFI,DeltaofDeltaBehav) corr(deltaMFI,DeltaofDeltaBehav);
+nIterations = 10000;
+corr_ci = bootci(nIterations,{mycorr,deltaMFI,DeltaofDeltaBehav});
+
+% for the figure and data sharingg
+% data = table(mean(DeltaQuestio,2),DeltaofDelta);
+% data.Properties.VariableNames = {'MFI', 'Behaviour'};
+% writetable(data, '~/ownCloud/MATLAB/Scripts/TDT/original/private/analysis/data_extracted/Tables/Behavior/QuestioCorrel.txt')
 
 % do corr on sleepiness scores
-[rhoKaro, corrpvalKaro] = corr(Karolinska,DeltaofDelta, 'type', 'Spearman')
+[rhoKaro, corrpvalKaro] = corr(deltaKarolinska,DeltaofDeltaBehav, 'type', 'Spearman');
