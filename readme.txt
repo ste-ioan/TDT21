@@ -1,8 +1,7 @@
 This repository contains matlab files for the publication "Passive visual stimulation induces fatigue or improvement depending on cognitive load" by Ioannucci, Borragan and Zenon
 
 the "MainScripts" folder contains all the scripts related to running the experiment, they require Psychtoolbox to work.
-Masterscript.m is the script launched to run any participant, and calls all the other main scripts included in the folder, which themselves then rely on the
-codes within the "private" folder.
+Masterscript.m is the script launched to run any participant, and calls all the other main scripts included in the folder, which themselves then rely on the codes within the "private" folder.
 
 the "analysis" folder contains all the scripts relating to data extraction and analysis.
 in the case of the EEG, all is done through matlab. 
