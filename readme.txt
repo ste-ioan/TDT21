@@ -1,6 +1,4 @@
-This repository contains matlab files for the publication "Passive visual stimulation induces fatigue under high cognitive load" by Ioannucci, Borragan and Zenon
-
-the "MainScripts" folder contains all the scripts related to running the main experiment, while in eyeTDT the scripts for study 2 may be found and in orientationTDT the scripts for study3. They require Psychtoolbox to work.
+The "MainScripts" folder contains all the scripts related to running the main experiment, while in eyeTDT the scripts for study 2 may be found and in orientationTDT the scripts for study3. They require Psychtoolbox to work.
 
 In each experiment, a Masterscript.m is the script that calls the other scripts to run any participant, which themselves then rely on the codes within the "private" folder.
 
