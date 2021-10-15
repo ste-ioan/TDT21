@@ -1,7 +1,6 @@
-% script to plot newTDT training performances (flag), calculate some descriptives
-% and export a txt for Jamovi (flag)
+% script to plot newTDT training performances
+
 trainingplotflag = true;
-newfileflag = false; 
 
 clc
 
@@ -92,49 +91,3 @@ if trainingplotflag
         cd ..
     end
 end
-
-cd('/Users/mococomac/ownCloud/MATLAB/Scripts/TDT/newTDT/private')
-[baseline, quadrant_regardless_of_orientation, non_saturated_quadrant, saturated_quadrant] = matrixForJamovi(newfileflag);
-
-Looper = 1;
-
-while Looper
-    firstlist = {'baseline', 'quadrant_regardless_of_orientation', 'non_saturated_quadrant', 'saturated_quadrant'};
-    idx = listdlg('ListString', firstlist, 'OKString', 'choose', 'PromptString', 'Thy choice master?', 'CancelString', 'none');
-    try
-    firstchoice = firstlist{idx};
-    catch
-    firstchoice = 'none';   
-    end
-    
-    switch firstchoice
-        case 'none'
-            break
-            
-        otherwise
-            while Looper
-                secondlist = {'mean', 'median'};
-                idx2 = listdlg('ListString', secondlist,'OKString', 'calculate', 'PromptString', 'Desired parameter?', 'CancelString', 'that is enough');
-                try
-                secondchoice = secondlist{idx2};
-                catch
-                secondchoice = 'none';
-                end
-                
-                switch secondchoice
-                    case 'none'
-                        break
-                    case 'mean'
-                        disp([upper(firstchoice), ' ', upper(secondchoice)])
-                        disp(varfun(@mean, eval(firstchoice), 'GroupingVariable', 'subgroup'))
-                    case 'median'
-                        disp([upper(firstchoice), ' ', upper(secondchoice)])
-                        disp(varfun(@median, eval(firstchoice), 'GroupingVariable', 'subgroup'))
-                end
-                
-            end
-    end
-    
-end
-
-clearvars -except baseline quadrant_regardless_of_orientation orientation_regardless_of_quadrant saturated_quadrant
