@@ -1,4 +1,4 @@
-The "MainScripts" folder contains all the scripts related to running the main experiment, while in eyeTDT the scripts for study 2 may be found and in orientationTDT the scripts for study3. They require Psychtoolbox to work.
+The "MainScripts" folder contains all the scripts related to running the main experiment, while in eyeTDT the scripts for study 2 may be found and in orientationTDT the scripts for study3. They require Psychtoolbox to work, and the sound files in the case of the n-back and side task.
 
 In each experiment, a Masterscript.m is the script that calls the other scripts to run any participant, which themselves then rely on the codes within the "private" folder.
 
